@@ -11,6 +11,9 @@ function handleCheckinDateChange(checkinDateElem, setCheckinDate) {
   setCheckinDate(formattedDateStr);
 }
 
+let debounceTimeout = null;
+let currentRequestId = 0;
+
 /**
  * Checks the availability of the requested dates when the "Check-in date" or "Duration of stay" change.
  * The availability should only be checked if checkinDate matches the yyyy-mm-dd format and the user has stopped
@@ -30,7 +33,25 @@ export function onRequestedDatesChange(
   durationString,
   setShowAvailabilityError
 ) {
-  // TODO: implement function
+  if (debounceTimeout) {
+    clearTimeout(debounceTimeout);
+  }
+
+  debounceTimeout = setTimeout(() => {
+    const dateFormat = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateFormat.test(checkinDate)) {
+      return;
+    }
+
+    const duration = durationString === '' ? 1 : Number(durationString);
+    const requestId = ++currentRequestId;
+
+    ApiUtil.checkAvailability(propertyId, checkinDate, duration).then((available) => {
+      if (requestId === currentRequestId) {
+        setShowAvailabilityError(!available);
+      }
+    });
+  }, 500);
 }
 
 const BookingForm = ({ rate }) => {
