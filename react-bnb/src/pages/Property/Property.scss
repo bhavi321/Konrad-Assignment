@@ -4,16 +4,34 @@
   box-sizing: border-box;
   width: 100%;
   max-width: $breakpoint-desktop-lg;
+  margin: 0 auto;
   padding: 0 3rem;
 
-  .property-info-section {
-    display: inline-block;
-    width: 66%;
+  .property-content {
+    display: flex;
+    gap: 2rem;
+
+    .property-info-section {
+      flex: 1;
+    }
+
+    .property-booking-section {
+      width: 18rem;
+      flex-shrink: 0;
+    }
   }
 
-  .property-booking-section {
-    width: 33%;
-    vertical-align: top;
-    display: inline-block;
+  @media (max-width: $breakpoint-tablet) {
+    .property-content {
+      flex-direction: column;
+
+      .property-info-section {
+        width: 100%;
+      }
+
+      .property-booking-section {
+        width: 100%;
+      }
+    }
   }
 }
