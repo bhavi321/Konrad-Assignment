@@ -1,20 +1,29 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import './PropertyGrid.scss';
-import { ApiUtil } from '../../lib/apiUtil';
 import { getPropertiesForPage } from '../../lib/paginationUtil';
+import { filterProperties } from '../../lib/filterUtil';
 import Pagination from '../Pagination/Pagination';
 
-const PropertyGrid = () => {
-  const [properties, setProperties] = useState(null);
+const PropertyGrid = ({ properties, filters }) => {
   const [page, setPage] = useState(1);
 
   useEffect(() => {
-    ApiUtil.getProperties().then((data) => setProperties(data));
-  }, []);
+    setPage(1);
+  }, [filters]);
 
-  if (!properties || properties.length === 0) {
+  if (!properties) {
+    return (
+      <div className="property-grid">
+        <div className="no-results">Loading...</div>
+      </div>
+    );
+  }
+
+  const filteredProperties = filterProperties(properties, filters);
+
+  if (filteredProperties.length === 0) {
     return (
       <div className="property-grid">
         <div className="no-results">No Properties Found</div>
@@ -22,7 +31,7 @@ const PropertyGrid = () => {
     );
   }
 
-  const paginatedProperties = getPropertiesForPage(properties, page);
+  const paginatedProperties = getPropertiesForPage(filteredProperties, page);
 
   return (
     <div className="property-grid">
@@ -57,13 +66,14 @@ const PropertyGrid = () => {
           );
         })}
       </ul>
-      <Pagination page={page} setPage={setPage} propertyCount={properties.length} />
+      <Pagination page={page} setPage={setPage} propertyCount={filteredProperties.length} />
     </div>
   );
 };
 
 PropertyGrid.propTypes = {
-  page: PropTypes.number,
+  properties: PropTypes.array,
+  filters: PropTypes.object,
 };
 
 export default PropertyGrid;
